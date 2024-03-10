@@ -107,7 +107,6 @@ int pentominos[12][8][8] =
   { 1,0, 2,0, 3,0, 4,0 }
  }
 };
-
 // The number of possible variants that each piece has.
 const int numVariants[12] = {
  1, 4, 8, 4, 8, 4, 8, 8, 4, 8, 4, 2

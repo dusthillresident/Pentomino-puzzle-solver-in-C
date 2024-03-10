@@ -120,12 +120,10 @@ int tempboard[22][22];
 // The width and height of the current board configuration.
 int w;
 int h;
-
 // This array is used to keep track of which pieces are currently placed on the board (and so are 'currently in use')
 int inUse[12] = {
  0,0,0,0,0,0,0,0,0,0,0,0
 };
-
 // This keeps track of the number of free spaces there are on the board right now. When this reaches 0, we've found a solution.
 // It's initialised to 9999 as a failsafe so that if you pass some strange/invalid combination of command line arguments, you just get the "impossible to solve" error message and not a segmentation fault or something.
 int freeSpaces = 9999;

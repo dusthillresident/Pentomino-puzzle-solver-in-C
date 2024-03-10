@@ -204,6 +204,26 @@ void printSolution_roundedEdges(){
  }
 }
 
+void printSolution_basic(){
+ int x,y,this,last=0,surrounds;
+ printf("\n ");
+ for( y=1; y<=h; y++){
+  for( x=1; x<=w; x++ ){
+   this = board[x][y];
+   if( this>0 ){
+    if( printSolutionColoursEnabled && last != this ){
+     printf("\x1b[38;5;%dm", 29+(this<<4) );
+     last = this;
+    }
+    printf("%x", this-1);
+   } else {
+    printf(" ");
+   }
+  }
+  printf("\n ");
+ }
+}
+
 void (*printSolution)(void) = printSolution_roundedEdges;
 
 #define ISPOSSIBLE_FILLED_VALUE -2
@@ -335,22 +355,33 @@ void configureBoardFromString( char *string ){
 int main(int argc, char **argv){
  int width = 0, height = 0;
 
+ /* Print terminal colours if this is a terminal */
+ printSolutionColoursEnabled = isatty(STDOUT_FILENO);
+
  /* Usage message */
  if( argc == 1 ){ 
   usageMessage:
-  printf("=== Pentomino puzzle solution finder ===\n\nUsage and command line options:\n");
+  printf("=== Pentomino puzzle solution finder ===\nUsage and command line options:\n");
   printf(" -w [width] \n");
   printf(" -h [height] \n");
-  printf(" -board [board string] \n");
+  printf(" -board [board string. Refer to the example commands] \n");
   printf(" -n [number of solutions to stop at, default 1] \n");
   printf(" -all (don't stop until search is exhausted)\n");
-  printf(" -style [number] (choose the style you want to display the solutions in)\n   (0: rounded edges (bigger)  1: sharpened lines (smaller)) \n\n");
+  printf(" -pieces [binary string / list of booleans enabling/disabling the use of specific pieces. Refer to the piece index reference]\n");
+  printf(" -style [number] (choose the style you want to display the solutions in)\n   (0: rounded edges (bigger)  1: sharpened lines (smaller)  2: simple/plain) \n\n");
  
+  printf("=== Example commands ===\n");
   printf("Try copy pasting these example commands:\n\n");
   printf("Example 1:\n%s  -w 20  -h 3\n\n",argv[0]);
   printf("Example 2:\n%s  -w 12  -h 5  -n 2\n\n",argv[0]);
   printf("Example 3:\n%s  -w 5 -h 5  -style 1\n\n",argv[0]);
-  printf("Example 4:\n%s -board '\n#......#\n........\n........\n........\n........\n........\n........\n#......#'\n\n",argv[0]);
+  printf("Example 4:\n%s -board '\n#..............#\n................\n................\n#..............#'\n\n",argv[0]);
+  printf("Example 5:\n%s -board '\n............\n............\n#........#..\n##......###.\n##.......#..' -all -pieces 011111111011\n\n",argv[0]);
+
+
+  printf("=== Piece index reference ===\nThis informs you which index of the binary string corresponds to which pentomino piece.\nThe hex number used to draw a piece is its index value.\n");
+  configureBoard(20,3); searchUntil=1; printSolution = printSolution_basic; solve(1,1);
+  if( printSolutionColoursEnabled ) printf("\x1b[38;5;%dm",255 );
   return 1;
  }
 
@@ -368,6 +399,12 @@ int main(int argc, char **argv){
   if( ! strcmp( "-w", argv[i] ) ){
    i++; if( i==argc ) goto missingParameter;
    width = atoi( argv[i] );
+  }else if( ! strcmp( "-pieces", argv[i] ) ){ 
+   i++; if( i==argc ) goto missingParameter;
+   int l = strlen( argv[i] ); if( l>12 ) l=12;
+   for( int j=0; j<l; j++ ){
+    inUse[j] = (argv[i][j]=='0');
+   }
   }else if( ! strcmp( "-h", argv[i] ) ){ 
    i++; if( i==argc ) goto missingParameter;
    height = atoi( argv[i] );
@@ -382,8 +419,8 @@ int main(int argc, char **argv){
    searchUntil = 0;
   }else if( ! strcmp( "-style", argv[i] ) ){ 
    i++; if( i==argc ) goto missingParameter;
-   int style = atoi( argv[i] ) & 1;
-   printSolution = (void*[]){ printSolution_roundedEdges, printSolution_pointedLines }[style];
+   int style = atoi( argv[i] ) % 3; if( style < 0 ) style = -style;
+   printSolution = (void*[]){ printSolution_roundedEdges, printSolution_pointedLines, printSolution_basic }[style];
   }else {
    printf("Unknown option '%s'\n\n",argv[i]);
    goto usageMessage;
@@ -398,9 +435,6 @@ int main(int argc, char **argv){
   return 1;
  }
 
- /* Print terminal colours if this is a terminal */
- printSolutionColoursEnabled = isatty(STDOUT_FILENO);
-
  /* Find solutions */
  solve(1,1);
 
@@ -410,6 +444,6 @@ int main(int argc, char **argv){
  if( searchUntil )
   printf("\nCompleted\n");
  else
-  printf("\nCompleted, %d solutions found\n",solutionsFound);
+  printf("\nCompleted, %d solution%s found\n",solutionsFound, solutionsFound>1 ? "s" : "" );
  return 0;
 }

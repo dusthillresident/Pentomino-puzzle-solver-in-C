@@ -3,6 +3,9 @@
 #include <string.h>
 #include <unistd.h>
 
+// These are the definitions of the pentomino pieces and all their possible rotated & flipped variants.
+// They're represented as arrays of 8 numbers, where each odd and even pair represent X and Y offsets of the squares from the origin 0,0.
+// Note that only four squares need to be represented, because the first square is understood to be 0,0.
 int pentominos[12][8][8] =
 {
  {
@@ -105,23 +108,35 @@ int pentominos[12][8][8] =
  }
 };
 
-int board[22][22];
-int tempboard[22][22];
-int w;
-int h;
-
+// The number of possible variants that each piece has.
 const int numVariants[12] = {
  1, 4, 8, 4, 8, 4, 8, 8, 4, 8, 4, 2
 };
 
+// The board.
+int board[22][22];
+// Temporary representation of the board used by the flood fill algorithm that detects unsolvable spaces (where the number of squares in the space is not divisible by 5)
+int tempboard[22][22];
+// The width and height of the current board configuration.
+int w;
+int h;
+
+// This array is used to keep track of which pieces are currently placed on the board (and so are 'currently in use')
 int inUse[12] = {
  0,0,0,0,0,0,0,0,0,0,0,0
 };
 
+// This keeps track of the number of free spaces there are on the board right now. When this reaches 0, we've found a solution.
+// It's initialised to 9999 as a failsafe so that if you pass some strange/invalid combination of command line arguments, you just get the "impossible to solve" error message and not a segmentation fault or something.
 int freeSpaces = 9999;
+// This keeps track of how many solutions have been found.
 int solutionsFound = 0;
+// The search continues until solutionsFound equals this value. If this is set to <= 0 (eg. if you use the -all commandline option) the search continues until all possibilities are exhausted.
 int searchUntil = 1;
+// When this is true, ANSI escape codes will be used to colour the console output for the solutions.
+int printSolutionColoursEnabled = 0;
 
+// This prepares the board for a simple rectangular configuration where every square is empty.
 void configureBoard(int width, int height){
  if( width < 1 || height < 1 || width > 20 || height > 20 ){
   fprintf(stderr, "Invalid board configuration\n");
@@ -141,9 +156,36 @@ void configureBoard(int width, int height){
  freeSpaces = width*height;
 }
 
-int printSolutionColoursEnabled = 0;
+// This prepares the board for a complex board configuration of an arbitrary width and height (but which may not exceed 20x20) where certain squares of the grid are 'filled in'.
+void configureBoardFromString( char *string ){
+ if( *string == '\n' ) string++;
+ int width=0;
+ while( string[width] && string[width] != '\n' ){
+  width++;
+ }
+ int i=0,height=0;
+ while( string[i] ){
+  height += (string[i] == '\n');
+  i++;
+ }
+ configureBoard( width, height + (string[i-1]!='\n') );
+ i=0;
+ int x=1,y=1;
+ while( string[i] ){
+  if( string[i] == '#' ){
+   board[x][y] = -1;
+   freeSpaces--;
+  }
+  if(string[i]=='\n' || x>w){
+   x=1; y+=1;
+  } else {
+   x++;
+  }
+  i++;
+ }
+}
 
-
+// This prints the current state of the board in the 'pointed lines' style.
 void printSolution_pointedLines(){
  int x,y,this,last=0,surrounds;
  printf("\n ");
@@ -165,6 +207,7 @@ void printSolution_pointedLines(){
  }
 }
 
+// This prints the current state of the board in the 'rounded edges' style.
 void printSolution_roundedEdges(){
  int x,y,this,last=0,surrounds;
  printf("\n ");
@@ -204,6 +247,7 @@ void printSolution_roundedEdges(){
  }
 }
 
+// This prints the current state of the board in the 'basic' style.
 void printSolution_basic(){
  int x,y,this,last=0,surrounds;
  printf("\n ");
@@ -224,8 +268,10 @@ void printSolution_basic(){
  }
 }
 
+// This function pointer is set depending on which style has been chosen.
 void (*printSolution)(void) = printSolution_roundedEdges;
 
+// This is the flood filling blank space size counter algorithm that's used by 'isPossible'.
 #define ISPOSSIBLE_FILLED_VALUE -2
 int isPossibleFloodFiller(int x, int y){
  tempboard[x][y] = ISPOSSIBLE_FILLED_VALUE;
@@ -236,6 +282,8 @@ int isPossibleFloodFiller(int x, int y){
  if(!tempboard[x][y+1]) count += isPossibleFloodFiller( x, y+1 );
  return count;
 }
+
+// This function determines whether a board configuration can possibly be solved.
 int isPossible(int start_y){
  int x,y, result = 1;
  memcpy( tempboard, board, sizeof(board) );
@@ -249,6 +297,11 @@ int isPossible(int start_y){
  return 1;
 }
 
+// This is the solution finding algorithm.
+// We find the first empty square on the board. For each available piece, and for each of its variants, we test if it can possibly fill the first empty square.
+// If it can, we place it there, and then we test if the resulting board configuration is solvable. 
+// If it is, we continue the search at the current first empty square with the remaining available pieces.
+// The search continues until we've found as many solutions as we were looking for (specified by 'searchUntil') or until we have exhausted all the possibilities.
 void solve(int x, int y){
  while( board[x][y] ){
   x+=1; if(x>w){ x=1; y+=1; }
@@ -324,34 +377,7 @@ void solve(int x, int y){
  }
 }
 
-void configureBoardFromString( char *string ){
- if( *string == '\n' ) string++;
- int width=0;
- while( string[width] && string[width] != '\n' ){
-  width++;
- }
- int i=0,height=0;
- while( string[i] ){
-  height += (string[i] == '\n');
-  i++;
- }
- configureBoard( width, height + (string[i-1]!='\n') );
- i=0;
- int x=1,y=1;
- while( string[i] ){
-  if( string[i] == '#' ){
-   board[x][y] = -1;
-   freeSpaces--;
-  }
-  if(string[i]=='\n' || x>w){
-   x=1; y+=1;
-  } else {
-   x++;
-  }
-  i++;
- }
-}
-
+// Main function / entry point
 int main(int argc, char **argv){
  int width = 0, height = 0;
 

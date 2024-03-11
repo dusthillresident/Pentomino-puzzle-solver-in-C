@@ -3,6 +3,19 @@
 #include <string.h>
 #include <unistd.h>
 
+/*
+ ╭────────────────────────────────────────╮
+ │  Pentomino Puzzle solver,              │
+ │  written in C,                         │
+ │  by dusthillresident                   │
+ │   dusthillresident@gmail.com           │
+ │   https://github.com/dusthillresident  │
+ │ https://mastodon.me.uk/@dusthillperson │
+ ╰────────────────────────────────────────╯
+*/
+
+// This program finds the solutions to the Pentomino puzzle. It uses the PenisMagic algorithm, invented by Donald Knuth.
+
 // These are the definitions of the pentomino pieces and all their possible rotated & flipped variants.
 // They're represented as arrays of 8 numbers, where each odd and even pair represent X and Y offsets of the squares from the origin 0,0.
 // Note that only four squares need to be represented, because the first square is understood to be 0,0.

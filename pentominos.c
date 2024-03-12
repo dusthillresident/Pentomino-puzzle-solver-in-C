@@ -14,7 +14,7 @@
  ╰────────────────────────────────────────╯
 */
 
-// This program finds the solutions to the Pentomino puzzle. It uses the PenisMagic algorithm, invented by Donald Knuth.
+// This program finds the solutions to the Pentomino puzzle. If you run it without any command line arguments, you'll get a message explaining how to use the program.
 
 // These are the definitions of the pentomino pieces and all their possible rotated & flipped variants.
 // They're represented as arrays of 8 numbers, where each odd and even pair represent X and Y offsets of the squares from the origin 0,0.
@@ -308,14 +308,12 @@ int isPossible(int start_y){
 }
 
 // This is the solution finding algorithm.
-// We find the first empty square on the board. For each available piece, and for each of its variants, we test if it can possibly fill the first empty square.
-// If it can, we place it there, and then we test if the resulting board configuration is solvable. 
-// If it is, we continue the search at the current first empty square with the remaining available pieces.
-// The search continues until we've found as many solutions as we were looking for (specified by 'searchUntil') or until we have exhausted all the possibilities.
 void solve(int x, int y){
+ // We find the first empty square on the board.
  while( board[x][y] ){
   x+=1; if(x>w){ x=1; y+=1; }
  }
+ // For each available (not currently placed) piece, and for each of its variants, we test if it can be placed in order to fill the first empty square.
  int piece, variant, n, *pieceIndices;
  for( piece=0; piece<12; piece++ ){
   if( !inUse[piece] ){
@@ -330,6 +328,7 @@ void solve(int x, int y){
            ||
            board[x+pieceIndices[6]][y+pieceIndices[7]] ) )
     {
+     // If it can be placed, we place it there, and then we test if the resulting board configuration is solvable.
      int v = piece+1;
 
      board[x][y] = v;
@@ -339,37 +338,18 @@ void solve(int x, int y){
      board[x+pieceIndices[6]][y+pieceIndices[7]] = v;
 
      if( !isPossible(y) ) goto wasntPossible;
-     #ifdef DEBUG
-     else {
-      printf("\n\x1b[38;5;%dm",255 );
-      for(int i=0; i<12; i++){
-       printf(" %d", numVariants[i]);
-      }
-      putchar('\n');
-      for(int i=0; i<12; i++){
-       printf(" %d", inUse[i]);
-      }
-      printf("\nfreeSpaces == %d\n",freeSpaces);
-      printSolution();
-      #ifndef DONTWAIT
-      usleep(16.6*1000*7);
-      #endif
-     }
-     #endif
-     inUse[piece] = 1;/* 1 */ freeSpaces -= 5;
+
+     // If the resulting board is solvable, we continue the search at the new current first empty square with the remaining available pieces.
+     // The search continues until we've found as many solutions as we were looking for (specified by 'searchUntil') or until we have exhausted all the possibilities.
+
+     inUse[piece] = 1; freeSpaces -= 5;
      if( !freeSpaces ){
-      #ifdef DEBUG
-      system("beep");
-      #endif
       solutionsFound++;
       printSolution();
       if( solutionsFound == searchUntil ){
        printf("\n\n");
        exit(0);
       }
-      #ifdef QUIT
-      exit(0);
-      #endif
      } else {
       solve(x,y);
      }

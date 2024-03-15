@@ -392,6 +392,7 @@ int main(int argc, char **argv){
   printf(" -pieces [binary string / list of booleans enabling/disabling the use of specific pieces. Refer to the piece index reference]\n");
   #ifdef DAEDALIAN
   printf(" -password [use a preset board & available pieces configuration corresponding to a password from 'Daedalian Opus']\n");
+  printf(" -level [like -password except you specify the 'Daedalian Opus' level number, from 2 to 36]\n");
   #endif
   printf(" -style [number] (choose the style you want to display the solutions in)\n   (0: rounded edges (bigger)  1: sharpened lines (smaller)  2: simple/plain) \n\n");
  
@@ -441,6 +442,14 @@ int main(int argc, char **argv){
   }else if( ! strcmp( "-password", argv[i] ) ){
    i++; if( i==argc ) goto missingParameter;
    daedalianOpusPasswordLookup( argv[i] );
+  }else if( ! strcmp( "-level", argv[i] ) ){
+   i++; if( i==argc ) goto missingParameter;
+   int levelNumber = atoi( argv[i] );
+   if( levelNumber < 2 || levelNumber > 36 ){
+    printf("-level: level number must be in range 2 to 36\n");
+    return 1;
+   }
+   daedalianOpusPasswordLookup( daedalianOpusLevels[levelNumber-2][0] );
   #endif
   }else if( ! strcmp( "-n", argv[i] ) ){
    i++; if( i==argc ) goto missingParameter;

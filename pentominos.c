@@ -367,6 +367,12 @@ void solve(int x, int y){
  }
 }
 
+#ifdef DAEDALIAN
+// Optional support for 'Daedalian Opus' passwords.
+// See https://en.wikipedia.org/wiki/Daedalian_Opus
+#include "daedalian_opus.c"
+#endif
+
 // Main function / entry point
 int main(int argc, char **argv){
  int width = 0, height = 0;
@@ -384,6 +390,9 @@ int main(int argc, char **argv){
   printf(" -n [number of solutions to stop at, default 1] \n");
   printf(" -all (don't stop until search is exhausted)\n");
   printf(" -pieces [binary string / list of booleans enabling/disabling the use of specific pieces. Refer to the piece index reference]\n");
+  #ifdef DAEDALIAN
+  printf(" -password [use a preset board & available pieces configuration corresponding to a password from 'Daedalian Opus']\n");
+  #endif
   printf(" -style [number] (choose the style you want to display the solutions in)\n   (0: rounded edges (bigger)  1: sharpened lines (smaller)  2: simple/plain) \n\n");
  
   printf("=== Example commands ===\n");
@@ -424,10 +433,15 @@ int main(int argc, char **argv){
   }else if( ! strcmp( "-h", argv[i] ) ){ 
    i++; if( i==argc ) goto missingParameter;
    height = atoi( argv[i] );
-  }else if( ! strcmp( "-board", argv[i] ) ){ 
+  }else if( ! strcmp( "-board", argv[i] ) ){
    i++; if( i==argc ) goto missingParameter;
    width=0; height=0;
    configureBoardFromString(argv[i]);
+  #ifdef DAEDALIAN
+  }else if( ! strcmp( "-password", argv[i] ) ){
+   i++; if( i==argc ) goto missingParameter;
+   daedalianOpusPasswordLookup( argv[i] );
+  #endif
   }else if( ! strcmp( "-n", argv[i] ) ){
    i++; if( i==argc ) goto missingParameter;
    searchUntil = atoi( argv[i] );

@@ -1,4 +1,23 @@
 
+/*
+ ╭────────────────────────────────────────╮
+ │  'Daedalian Opus' level definitions    │
+ │  for pentomino puzzle solver,          │
+ │  by dusthillresident                   │
+ │   dusthillresident@gmail.com           │
+ │   https://github.com/dusthillresident  │
+ │ https://mastodon.me.uk/@dusthillperson │
+ ╰────────────────────────────────────────╯
+
+ This file contains the definitions for the levels from 'Daedalian Opus',
+ a pentomino puzzle game for Nintendo's GameBoy.
+
+ For more information, see:
+ https://www.youtube.com/watch?v=WeAXLnii5CE
+ https://en.wikipedia.org/wiki/Daedalian_Opus
+*/
+
+
 #define ALL "111111111111"
 
 char *daedalianOpusLevels[][3] =

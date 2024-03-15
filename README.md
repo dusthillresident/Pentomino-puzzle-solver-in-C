@@ -2,6 +2,7 @@
 A pentomino solver written in C, I tried to make it fast and featureful.
 
 If you're a fan of the GameBoy game 'Daedalian Opus', you might find this tool interesting. Compile with -DDAEDALIAN to enable support for 'Daedalian Opus' passwords, and then you can find the solutions for the 'Daedalian Opus' levels by using -password [PASS] or -level [LEVEL NUMBER]
+
 For more information on 'Daedalian Opus', see https://en.wikipedia.org/wiki/Daedalian_Opus
 
 The usage message, printed when you run the program with no command line arguments, explains how to use it. Here is the usage message:

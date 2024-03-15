@@ -3,7 +3,7 @@ A pentomino solver written in C, I tried to make it fast and featureful.
 
 I recommend compiling it with GCC, like this:
 
-`gcc -O2 -DDAEDALIAN pentomino.c`
+`gcc -O2 -DDAEDALIAN pentominos.c`
 
 If you're a fan of the GameBoy game 'Daedalian Opus', you might find this tool interesting. Compile with `-DDAEDALIAN` to enable support for 'Daedalian Opus' passwords, and then you can find the solutions for the 'Daedalian Opus' levels by using command line options `-password [PASS]` or `-level [LEVEL NUMBER]`
 
